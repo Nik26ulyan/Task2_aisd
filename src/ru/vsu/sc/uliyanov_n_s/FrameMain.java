@@ -4,7 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import ru.vsu.sc.uliyanov_n_s.error.ErrorMessage;
-import ru.vsu.sc.uliyanov_n_s.utils.ArrayAndListUtils;
+import ru.vsu.sc.uliyanov_n_s.utils.ArrayListQueueUtils;
 import ru.vsu.sc.uliyanov_n_s.utils.JTableUtils;
 import ru.vsu.sc.uliyanov_n_s.utils.SwingUtils;
 
@@ -15,11 +15,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
+import java.util.Queue;
 
 public class FrameMain extends JFrame {
     private JPanel panelMain;
-    private JTable tableOutput;
+    private JTable tableOutput1;
     private JButton buttonLoadInputFromFile;
     private JButton buttonArrayTransform;
     private JButton buttonSaveOutputInFile;
@@ -27,6 +27,7 @@ public class FrameMain extends JFrame {
     private JButton buttonSaveInputInFile;
     private JTable tableInput;
     private JScrollPane JscrollPane;
+    private JTable tableOutput2;
 
     private final JFileChooser fileChooserOpen;
     private final JFileChooser fileChooserSave;
@@ -42,9 +43,11 @@ public class FrameMain extends JFrame {
         this.pack();
 
         JTableUtils.initJTableForArray(tableInput, 30, true, true, false, true, 25, 15);
-        JTableUtils.initJTableForArray(tableOutput, 30, true, true, false, true, 25, 15);
+        JTableUtils.initJTableForArray(tableOutput1, 30, true, true, false, true, 25, 15);
+        JTableUtils.initJTableForArray(tableOutput2, 30, true, true, false, true, 25, 15);
         tableInput.setRowHeight(30);
-        tableOutput.setRowHeight(30);
+        tableOutput1.setRowHeight(30);
+        tableOutput2.setRowHeight(30);
 
         fileChooserOpen = new JFileChooser();
         fileChooserSave = new JFileChooser();
@@ -71,7 +74,7 @@ public class FrameMain extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[][] arr = ArrayAndListUtils.readIntArray2FromFile(fileChooserOpen.getSelectedFile().getPath());
+                        int[][] arr = ArrayListQueueUtils.readIntArray2FromFile(fileChooserOpen.getSelectedFile().getPath());
                         assert arr != null;
                         JTableUtils.writeArrayToJTable(tableInput, arr, "%d");
                     }
@@ -91,7 +94,7 @@ public class FrameMain extends JFrame {
                         if (!file.toLowerCase().endsWith(".txt")) {
                             file += ".txt";
                         }
-                        ArrayAndListUtils.writeArrayToFile(file, matrix);
+                        ArrayListQueueUtils.writeArrayToFile(file, matrix);
                     }
                 } catch (Exception e) {
                     ErrorMessage.printErrorMessage(2);
@@ -104,12 +107,12 @@ public class FrameMain extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        Integer[][] matrix = JTableUtils.readIntMatrixFromJTable(tableOutput, Integer.class, Integer::parseInt, false, 0);
+                        Integer[][] matrix = JTableUtils.readIntMatrixFromJTable(tableOutput1, Integer.class, Integer::parseInt, false, 0);
                         String file = fileChooserSave.getSelectedFile().getPath();
                         if (!file.toLowerCase().endsWith(".txt")) {
                             file += ".txt";
                         }
-                        ArrayAndListUtils.writeArrayToFile(file, matrix);
+                        ArrayListQueueUtils.writeArrayToFile(file, matrix);
                     }
                 } catch (Exception e) {
                     ErrorMessage.printErrorMessage(2);
@@ -123,13 +126,16 @@ public class FrameMain extends JFrame {
                 try {
                     int[] arr = JTableUtils.readIntArrayFromJTable(tableInput);
 
-                    LinkedList<Integer> list = LinkedList.intArrayToLinkedList(arr);
-                    list.sort();
-                    int[] resultArr;
+                    MyQueue<Integer> myQueue = MyQueue.arrayToMyQueue(arr);
+                    QueueTransformer.transformMyQueue(myQueue);
+                    int[] resultArrWithMyQueue = MyQueue.myQueueToArray(myQueue);
 
-                    resultArr = LinkedList.intLinkedListToArray(list);
+                    Queue<Integer> queue = ArrayListQueueUtils.arrayToQueue(arr);
+                    QueueTransformer.transformQueue(queue);
+                    int[] resultArrWithQueue = ArrayListQueueUtils.queueToArray(queue);
 
-                    JTableUtils.writeArrayToJTable(tableOutput, resultArr, "%d");
+                    JTableUtils.writeArrayToJTable(tableOutput1, resultArrWithMyQueue, "%d");
+                    JTableUtils.writeArrayToJTable(tableOutput2, resultArrWithQueue, "%d");
                 } catch (Exception e) {
                     ErrorMessage.printErrorMessage(0);
                 }
@@ -140,7 +146,7 @@ public class FrameMain extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    int[][] matrix = ArrayAndListUtils.createRandomIntMatrix(
+                    int[][] matrix = ArrayListQueueUtils.createRandomIntMatrix(
                             tableInput.getRowCount(), tableInput.getColumnCount(), 0, 100);
                     JTableUtils.writeArrayToJTable(tableInput, matrix, "%d");
                 } catch (Exception e) {
@@ -166,12 +172,12 @@ public class FrameMain extends JFrame {
      */
     private void $$$setupUI$$$() {
         panelMain = new JPanel();
-        panelMain.setLayout(new GridLayoutManager(5, 1, new Insets(10, 10, 10, 10), 10, 10));
+        panelMain.setLayout(new GridLayoutManager(6, 1, new Insets(10, 10, 10, 10), 10, 10));
         panelMain.setBackground(new Color(-1));
         panelMain.setForeground(new Color(-1));
         panelMain.setMaximumSize(new Dimension(1000, 1000));
         panelMain.setMinimumSize(new Dimension(700, 350));
-        panelMain.setPreferredSize(new Dimension(700, 350));
+        panelMain.setPreferredSize(new Dimension(1000, 500));
         final JScrollPane scrollPane1 = new JScrollPane();
         scrollPane1.setBackground(new Color(-1));
         scrollPane1.setForeground(new Color(-1));
@@ -200,8 +206,8 @@ public class FrameMain extends JFrame {
         JscrollPane.setBackground(new Color(-1));
         JscrollPane.setForeground(new Color(-1));
         panelMain.add(JscrollPane, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        tableOutput = new JTable();
-        JscrollPane.setViewportView(tableOutput);
+        tableOutput1 = new JTable();
+        JscrollPane.setViewportView(tableOutput1);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel2.setBackground(new Color(-1));
@@ -218,7 +224,7 @@ public class FrameMain extends JFrame {
         panel3.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel3.setBackground(new Color(-1));
         panel3.setForeground(new Color(-1));
-        panelMain.add(panel3, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelMain.add(panel3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonSaveOutputInFile = new JButton();
         buttonSaveOutputInFile.setText("Сохранить в файл");
         panel3.add(buttonSaveOutputInFile, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -226,6 +232,10 @@ public class FrameMain extends JFrame {
         panel3.add(spacer5, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer6 = new Spacer();
         panel3.add(spacer6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final JScrollPane scrollPane2 = new JScrollPane();
+        panelMain.add(scrollPane2, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        tableOutput2 = new JTable();
+        scrollPane2.setViewportView(tableOutput2);
     }
 
     /**
@@ -234,4 +244,5 @@ public class FrameMain extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panelMain;
     }
+
 }

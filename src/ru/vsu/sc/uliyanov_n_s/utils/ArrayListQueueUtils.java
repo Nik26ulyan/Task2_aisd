@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-public class ArrayAndListUtils {
+public class ArrayListQueueUtils {
     private static final Random RND = new Random();
 
 
@@ -54,7 +54,7 @@ public class ArrayAndListUtils {
 
         Integer[] arr = list.toArray(new Integer[0]);
 
-        return ArrayAndListUtils.toPrimitive(arr);
+        return ArrayListQueueUtils.toPrimitive(arr);
     }
 
     public static String toString(Integer[] arr, String itemFormat) {
@@ -181,20 +181,47 @@ public class ArrayAndListUtils {
         return arr;
     }
 
-    public static List<Integer> readListFromFile(String fileName) {
-        int[] arr = readIntArrayFromFile(fileName);
-
-        if (arr == null)
-            return null;
-
-        return intArrayToList(arr);
+    public static void addAnotherQueue(Queue<Integer> queue1, Queue<Integer> queue2) {
+        int sizeOfQueue = queue2.size();
+        for (int i = 0; i < sizeOfQueue; i++) {
+            queue1.add(queue2.remove());
+        }
     }
 
-    public static void writeListToFile(String fileName, List<Integer> list) throws FileNotFoundException {
-        writeArrayToFile(fileName, ArrayAndListUtils.toObject(intListToArray(list)));
+    public static int[] queueToArray(Queue<Integer> queue) {
+        int[] arr = new int[queue.size()];
+
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = queue.remove();
+        }
+
+        return arr;
     }
 
-    public static void printListToConsole(List<Integer> list) {
-        printArrayInConsole(intListToArray(list));
+    public static Queue<Integer> arrayToQueue(int[] arr) {
+        Queue<Integer> queue = new LinkedList<>();
+
+        for (int i = 0; i < arr.length; i++) {
+            queue.add(arr[i]);
+        }
+
+        return queue;
     }
+//
+//    public static List<Integer> readListFromFile(String fileName) {
+//        int[] arr = readIntArrayFromFile(fileName);
+//
+//        if (arr == null)
+//            return null;
+//
+//        return intArrayToList(arr);
+//    }
+//
+//    public static void writeListToFile(String fileName, List<Integer> list) throws FileNotFoundException {
+//        writeArrayToFile(fileName, ArrayListQueueUtils.toObject(intListToArray(list)));
+//    }
+//
+//    public static void printListToConsole(List<Integer> list) {
+//        printArrayInConsole(intListToArray(list));
+//    }
 }

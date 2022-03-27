@@ -406,7 +406,7 @@ public class JTableUtils {
     public static int[][] readIntMatrixFromJTable1(JTable table) throws ParseException {
         try {
             Integer[][] matrix = readIntMatrixFromJTable(table, Integer.class, Integer::parseInt, false, 0);
-            return (int[][]) Arrays.stream(matrix).map(ArrayAndListUtils::toPrimitive).toArray((n) -> new int[n][]);
+            return (int[][]) Arrays.stream(matrix).map(ArrayListQueueUtils::toPrimitive).toArray((n) -> new int[n][]);
         } catch (JTableUtilsException impossible) {
         }
         return null;
